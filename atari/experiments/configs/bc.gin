@@ -1,0 +1,23 @@
+import dopamine.discrete_domains.atari_lib
+import experiments.run_experiment
+import experiments.replay_memory
+import experiments.agents.bc_agent
+import gin.tf.external_configurables
+
+
+BehaviourCloningAgent.replay_suffix = [50]
+BehaviourCloningAgent.tf_device = '/gpu:0'   # '/cpu:*'
+BehaviourCloningAgent.max_tf_checkpoints_to_keep = 1
+BehaviourCloningAgent.optimizer = @tf.train.AdamOptimizer()
+tf.train.AdamOptimizer.learning_rate = 0.00025
+
+atari_lib.create_atari_environment.game_name = 'Pong'
+# Sticky actions with probability 0.25, as suggested by (Machado et al., 2017).
+atari_lib.create_atari_environment.sticky_actions = True
+FixedReplayRunner.num_iterations = 100    # 200
+FixedReplayRunner.training_steps = 5000   # agent steps
+FixedReplayRunner.evaluation_steps = 125000  # agent steps
+FixedReplayRunner.max_steps_per_episode = 27000  # agent steps
+
+WrappedFixedReplayBuffer.replay_capacity = 1000000
+WrappedFixedReplayBuffer.batch_size = 256
